@@ -18,6 +18,11 @@ GEM
       timers (>= 4.1.1)
     celluloid-supervision (0.20.6)
       timers (>= 4.1.1)
+    coderay (1.1.2)
+    method_source (1.0.0)
+    pry (0.13.0)
+      coderay (~> 1.1)
+      method_source (~> 1.0)
     timers (4.3.0)
 
 PLATFORMS
@@ -25,6 +30,7 @@ PLATFORMS
 
 DEPENDENCIES
   celluloid
+  pry
 
 BUNDLED WITH
    1.17.2

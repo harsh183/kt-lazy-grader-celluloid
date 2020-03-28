@@ -1,35 +1,64 @@
 require 'celluloid'
+require 'pry'
+
+# We setup an actor for every question
+class Question
+  include Celluloid
+  attr_accessor :question_number,
+                :title, 
+                :starter_code, 
+                :test_code, 
+                :points, 
+                :attempts
+  def initialize(question_number, title, starter_code)
+    @question_number = question_number
+    @title = title
+    @starter_code = starter_code 
+    @test_code = File.read("p#{question_number}_tests.kt")
+    @points = 0
+    @attempts = 0
+  end
+
+  def submit(student_code)
+    @attempts += 1
+    future.grade(student_code)
+  end
+
+  def grade(student_code)
+    framework = File.read("framework.kt")
+    payload = framework + @test_code + student_code 
+    
+    sleep 10 # some long ish time
+
+    return 100.0
+  end
+end
 
 puts "Welcome to proof of concept kt homework program"
 
 # puts "Enter your username"
 # username = gets.chomp
 
-questions = ["Add two numbers", "Multiply everything in a list"] # starter code, file_name
+questions = [ Question.new(0, "Add two numbers", "fun add(x: Int, y: Int) = "),
+              Question.new(1, "Multiply everything in a list", "fun multiply(in: List<Int>) = ") ]
 puts "Pick which question you want to do"
-questions.each_with_index {|item, index| puts "#{index} #{item}" }
+questions.each {|item| puts "#{item.question_number}: #{item.title}"}
 question_number = gets.chomp.to_i
 
 question = questions[question_number]
 file_name = "input.kt"
-File.write(file_name, "fun add(x: Int, y:Int) {}") # unhardcode
+File.write(file_name, question.starter_code) # unhardcode
 
 vim_status = system "vim #{file_name}" # check on status
 student_code = File.read(file_name) 
 File.delete(file_name) # delete temp file
 
-framework = File.read("framework.kt")
-tests = File.read("p#{question_number}_tests.kt")
+futures = []
 
-payload = framework + tests + student_code
+# to simulate some load
+rand(3..10).times {
+    futures << question.submit(student_code)
+    sleep rand(1..3)
+}
 
-puts payload
-
-class ProblemAttempt
-  include Celluloid
-  attr_accessor :payload, :points, :response, :attempt
-
-  def grade
-    return 100.0
-  end
-end
+binding.pry
